@@ -12,6 +12,7 @@ display a menu of different attacks, all with different persistence methods. Onc
 When naming the document, don't include a file extension.
 
 These attacks use Invoke-Shellcode, which was created by Matt Graeber. Follow him on Twitter --> @mattifestation
+I also used some code snippets from Nikhil Mittal. Follow him on Twitter as well --> @nikhil_mitt
 
 
 .Attack Types
