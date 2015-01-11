@@ -1,7 +1,7 @@
 <h2>Coded by Matt Nelson (@enigma0x3)</h2>
 
 <h4>SYNOPSIS</h4>
-Generate-Macro is a standalone PowerShell script that will generate a malicious Microsoft Office document with a specificity payload and persistence method.
+Generate-Macro is a standalone PowerShell script that will generate a malicious Microsoft Office document with a specified payload and persistence method.
 
 <h4>DESCRIPTION</h4>
 This script will generate malicious Microsoft Excel Documents that contain VBA macros. 
@@ -9,7 +9,7 @@ This script will prompt you for an IP address and port (you will receive your sh
 
 When naming the document, do not include a file extension.
 
-<strong>These attacks use Invoke-Shellcode, which was created by Matt Graeber. Follow him on Twitter --> @mattifestation</strong>
+<i>These attacks use Invoke-Shellcode, which was created by Matt Graeber. Follow him on Twitter --> <a href="https://www.twitter.com/mattifestation" target="_blank">@mattifestation</a></i>
 
 <h4>ATTACK TYPES</h4><ul>
 <li>Meterpreter Shell with Logon Persistence: <br />
