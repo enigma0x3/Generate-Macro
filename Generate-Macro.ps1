@@ -151,6 +151,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
@@ -258,6 +259,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
@@ -430,6 +432,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
