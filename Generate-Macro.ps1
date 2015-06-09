@@ -25,11 +25,11 @@ an infected Powershell Profile file in C:\Windows\SysNative\WindowsPowerShell\v1
 HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows\Load that executes Powershell.exe on startup. Since the Powershell profile loads automatically when 
 Powershell.exe is invoked, your code is executed automatically.
 
-Meterpreter Shell with Microsoft Outlook Email Persistence: This attack will give you a shell and then download a malicious Powershell script in this location:
-C:\Users\Public\. Once downloaded, it will insert your defined IP address, Port, Email address and Trigger word.
-It will then create a malicious .vbs file and drop it in C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\. Once dropped, it creates
-a registry key that executes it on login. When the Powershell script is executed, it monitors the user's Outlook Inbox for an email containing 
-the email address you specified as well as the subject. When it sees the email, it will delete it and send you a shell.
+Meterpreter Shell with Alternate Data Stream Persistence: This attack will give you a shell and then persists my creating 2 alternate data streams attached to the AppData
+folder. It then creates a registry key that parses the Alternate Data Streams and runs the Base64 encoded payload.
+
+Meterpreter Shell with Scheduled Task Persistence: This attack will give you a shell and then persist by creating a scheduled task with the action set to
+the set payload. 
 
 
 .EXAMPLE
@@ -41,7 +41,8 @@ Enter the name of the document (Do not include a file extension): FinancialData
 --------Select Attack---------
 1. Meterpreter Shell with Logon Persistence
 2. Meterpreter Shell with Powershell Profile Persistence (Requires user to be local admin)
-3. Meterpreter Shell with Microsoft Outlook Email Persistence
+3. Meterpreter Shell with Alternate Data Stream Persistence
+4. Meterpreter Shell with Scheduled Task Persistence
 ------------------------------
 Select Attack Number & Press Enter: 1
 
