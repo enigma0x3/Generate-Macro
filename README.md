@@ -20,9 +20,13 @@ This attack requires the target user to have Administrator privileges but is qui
 It will deliver you a shell and then drop a malicious .vbs file in C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookie.vbs. Once dropped, it creates an infected PowerShell Profile file in C:\Windows\SysNative\WindowsPowerShell\v1.0\ and then creates a registry key in HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows\Load that will execute Powershell.exe on startup. 
 Since the PowerShell profile loads automatically when Powershell.exe is invoked, your code is executed automatically.</li>
 
-<li>Meterpreter Shell with Microsoft Outlook Email Persistence: <br />
-This attack will give you a shell and then download a malicious Powershell script to C:\Users\Public\. 
-Once downloaded, it will insert your defined IP address, port, email address and trigger word. It will then create a malicious .vbs file and drop it in C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\. Once dropped, it creates a registry key that executes it on login. When the Powershell script is executed, it monitors the user's Outlook Inbox for an email containing the email address you specified as well as the trigger word in the subject. When it sees the email, it will delete it and send you a shell.</li>
+<li>Meterpreter Shell with Alternate Data Stream Persistence: <br />
+This attack will give you a shell and then persists my creating 2 alternate data streams attached to the AppData
+folder. It then creates a registry key that parses the Alternate Data Streams and runs the Base64 encoded payload.</li>
+
+<li>Meterpreter Shell with Scheduled Task Persistence: <br />
+This attack will give you a shell and then persist by creating a scheduled task with the action set to
+the set payload.</li>
 
 <h4>EXAMPLE</h4>
 ```
