@@ -13,6 +13,12 @@ When naming the document, don't include a file extension.
 
 These attacks use Invoke-Shellcode, which was created by Matt Graeber. Follow him on Twitter --> @mattifestation
 
+PowerSploit Function: Invoke-Shellcode
+Author: Matthew Graeber (@mattifestation)
+License: BSD 3-Clause
+Required Dependencies: None
+Optional Dependencies: None
+
 
 .Attack Types
 Meterpreter Shell with Logon Persistence: This attack delivers a meterpreter shell and then persists in the registry 
