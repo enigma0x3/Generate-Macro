@@ -3,6 +3,9 @@
 <h4>SYNOPSIS</h4>
 Generate-Macro is a standalone PowerShell script that will generate a malicious Microsoft Office document with a specified payload and persistence method.
 
+[!] This script will temporarily disable 2 macro security settings while creating the document.
+[!] The idea is to generate your malicious document on a development box you OWN and use that document to send to a target.
+
 <h4>DESCRIPTION</h4>
 This script will generate malicious Microsoft Excel Documents that contain VBA macros. 
 This script will prompt you for an IP address and port (you will receive your shell at this address and port) and the name of the malicious document. From there, the script will then prompt you to choose from a menu of different attacks, all with different persistence methods. Once an attack is chosen, it will then prompt you for your payload type. Currently, only HTTP and HTTPS are supported.
