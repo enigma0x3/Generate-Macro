@@ -24,7 +24,7 @@ It will deliver you a shell and then drop a malicious .vbs file in C:\Users\Defa
 Since the PowerShell profile loads automatically when Powershell.exe is invoked, your code is executed automatically.</li>
 
 <li>Meterpreter Shell with Alternate Data Stream Persistence: <br />
-This attack will give you a shell and then persists my creating 2 alternate data streams attached to the AppData
+This attack will give you a shell and then persists by creating 2 alternate data streams attached to the AppData
 folder. It then creates a registry key that parses the Alternate Data Streams and runs the Base64 encoded payload.</li>
 
 <li>Meterpreter Shell with Scheduled Task Persistence: <br />
